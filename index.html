@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unseen - Panel</title>
+    <title>Unseen - Panel Glass</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #e5d1c5; font-family: 'Helvetica Neue', sans-serif; }
         #webgl { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
@@ -51,7 +51,6 @@
             pointer-events: none;
         }
         
-        /* Botón de ocultar */
         #toggle-btn {
             position: fixed; top: 20px; right: 20px; z-index: 1000;
             width: 50px; height: 50px; border-radius: 50%;
@@ -100,6 +99,30 @@
             background: rgba(0,0,0,0.55); backdrop-filter: blur(10px); transition: all 0.2s;
         }
         #panel button:hover { background: rgba(0,0,0,0.75); transform: translateY(-1px); }
+        #panel button.mode { 
+            background: rgba(255, 255, 255, 0.35);
+            color: #1a1a1a;
+            border: 1px solid rgba(255,255,255,0.5);
+            margin-top: 5px; padding: 7px 4px; font-size: 10px;
+        }
+        #panel button.mode.active { 
+            background: rgba(40, 167, 69, 0.85); 
+            color: white;
+            box-shadow: 0 4px 12px rgba(40,167,69,0.3);
+        }
+        #panel .btn-row { display: flex; gap: 4px; margin-top: 5px; }
+        #panel .btn-row button { margin-top: 0; }
+
+        #hint {
+            position: fixed; bottom: 20px; left: 20px; z-index: 999;
+            padding: 12px 16px; border-radius: 14px; font-size: 11px; line-height: 1.6;
+            color: #1a1a1a;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.12);
+        }
+        #hint b { color: #000; }
     </style>
 </head>
 <body>
@@ -128,10 +151,27 @@
         </div>
     </div>
 
-    <!-- Botón para ocultar/mostrar panel -->
     <button id="toggle-btn" onclick="togglePanel()">🎛️</button>
 
+    <div id="hint">
+        <b>🎮 Controles:</b><br>
+        <b>1</b> Edificio · <b>2</b> Fondo<br>
+        <b>W</b> Mover · <b>E</b> Girar · <b>R</b> Escalar<br>
+        <b>H</b> Ocultar panel
+    </div>
+
     <div id="panel">
+        <h4>🎮 Selección</h4>
+        <div class="btn-row">
+            <button class="mode active" id="btn-sel-ed" onclick="selectTarget('edificio')">🏛️ Edificio</button>
+            <button class="mode" id="btn-sel-du" onclick="selectTarget('dunas')">🏜️ Fondo</button>
+        </div>
+        <div class="btn-row">
+            <button class="mode active" id="btn-mode-translate" onclick="setMode('translate')">🎯 Mover</button>
+            <button class="mode" id="btn-mode-rotate" onclick="setMode('rotate')">🔄 Girar</button>
+            <button class="mode" id="btn-mode-scale" onclick="setMode('scale')">📐 Escalar</button>
+        </div>
+
         <h4>🏛️ EDIFICIO</h4>
         <label>Tamaño <span class="value" id="v-ed-tam">40</span></label>
         <input type="range" id="s-ed-tam" min="1" max="500" value="40" step="1">
@@ -144,7 +184,7 @@
         <label>Girar Y <span class="value" id="v-ed-rot">0</span></label>
         <input type="range" id="s-ed-rot" min="-3.14" max="3.14" value="0" step="0.02">
 
-        <h4>🏜️ DUNAS</h4>
+        <h4>🏜️ FONDO</h4>
         <label>Tamaño <span class="value" id="v-du-tam">200</span></label>
         <input type="range" id="s-du-tam" min="1" max="2000" value="200" step="1">
         <label>Altura Y <span class="value" id="v-du-y">-3</span></label>
