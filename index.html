@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unseen - Panel Glass</title>
+    <title>Unseen - Editor</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #e5d1c5; font-family: 'Helvetica Neue', sans-serif; }
         #webgl { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
@@ -28,7 +28,6 @@
         .footer { display: flex; justify-content: space-between; align-items: center; pointer-events: auto; font-size: 0.9rem; }
         .footer-btn { background: rgba(255,255,255,0.8); border: none; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; cursor: pointer; }
 
-        /* ✨ PANEL GLASS ✨ */
         #panel {
             position: fixed; top: 20px; right: 20px; z-index: 999;
             padding: 18px; border-radius: 20px;
@@ -36,7 +35,6 @@
             font-size: 12px; color: #2a2a2a;
             max-height: 92vh; overflow-y: auto;
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
-            
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(24px) saturate(180%);
             -webkit-backdrop-filter: blur(24px) saturate(180%);
@@ -112,17 +110,14 @@
         }
         #panel .btn-row { display: flex; gap: 4px; margin-top: 5px; }
         #panel .btn-row button { margin-top: 0; }
-
-        #hint {
-            position: fixed; bottom: 20px; left: 20px; z-index: 999;
-            padding: 12px 16px; border-radius: 14px; font-size: 11px; line-height: 1.6;
+        
+        #target-name {
+            text-align: center; font-size: 14px; font-weight: 700;
+            padding: 8px; margin-bottom: 10px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 10px;
             color: #1a1a1a;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.12);
         }
-        #hint b { color: #000; }
     </style>
 </head>
 <body>
@@ -153,18 +148,13 @@
 
     <button id="toggle-btn" onclick="togglePanel()">🎛️</button>
 
-    <div id="hint">
-        <b>🎮 Controles:</b><br>
-        <b>1</b> Edificio · <b>2</b> Fondo<br>
-        <b>W</b> Mover · <b>E</b> Girar · <b>R</b> Escalar<br>
-        <b>H</b> Ocultar panel
-    </div>
-
     <div id="panel">
+        <div id="target-name">🏛️ EDIFICIO</div>
+        
         <h4>🎮 Selección</h4>
         <div class="btn-row">
             <button class="mode active" id="btn-sel-ed" onclick="selectTarget('edificio')">🏛️ Edificio</button>
-            <button class="mode" id="btn-sel-du" onclick="selectTarget('dunas')">🏜️ Fondo</button>
+            <button class="mode" id="btn-sel-fo" onclick="selectTarget('fondo')">🏜️ Fondo</button>
         </div>
         <div class="btn-row">
             <button class="mode active" id="btn-mode-translate" onclick="setMode('translate')">🎯 Mover</button>
@@ -172,27 +162,21 @@
             <button class="mode" id="btn-mode-scale" onclick="setMode('scale')">📐 Escalar</button>
         </div>
 
-        <h4>🏛️ EDIFICIO</h4>
-        <label>Tamaño <span class="value" id="v-ed-tam">40</span></label>
-        <input type="range" id="s-ed-tam" min="1" max="500" value="40" step="1">
-        <label>Altura Y <span class="value" id="v-ed-y">-1.5</span></label>
-        <input type="range" id="s-ed-y" min="-50" max="50" value="-1.5" step="0.5">
-        <label>Profundidad Z <span class="value" id="v-ed-z">-5</span></label>
-        <input type="range" id="s-ed-z" min="-100" max="50" value="-5" step="0.5">
-        <label>Posición X <span class="value" id="v-ed-x">0</span></label>
-        <input type="range" id="s-ed-x" min="-50" max="50" value="0" step="0.5">
-        <label>Girar Y <span class="value" id="v-ed-rot">0</span></label>
-        <input type="range" id="s-ed-rot" min="-3.14" max="3.14" value="0" step="0.02">
-
-        <h4>🏜️ FONDO</h4>
-        <label>Tamaño <span class="value" id="v-du-tam">200</span></label>
-        <input type="range" id="s-du-tam" min="1" max="2000" value="200" step="1">
-        <label>Altura Y <span class="value" id="v-du-y">-3</span></label>
-        <input type="range" id="s-du-y" min="-100" max="100" value="-3" step="1">
-        <label>Profundidad Z <span class="value" id="v-du-z">-60</span></label>
-        <input type="range" id="s-du-z" min="-500" max="50" value="-60" step="1">
-        <label>Girar Y <span class="value" id="v-du-rot">0</span></label>
-        <input type="range" id="s-du-rot" min="-3.14" max="3.14" value="0" step="0.02">
+        <h4>📐 Transformación</h4>
+        <label>Tamaño <span class="value" id="v-tam">40</span></label>
+        <input type="range" id="s-tam" min="0.5" max="1000" value="40" step="0.5">
+        
+        <label>Posición X <span class="value" id="v-x">0</span></label>
+        <input type="range" id="s-x" min="-100" max="100" value="0" step="0.5">
+        
+        <label>Altura Y <span class="value" id="v-y">-1.5</span></label>
+        <input type="range" id="s-y" min="-100" max="100" value="-1.5" step="0.5">
+        
+        <label>Profundidad Z <span class="value" id="v-z">-5</span></label>
+        <input type="range" id="s-z" min="-200" max="100" value="-5" step="0.5">
+        
+        <label>Girar Y <span class="value" id="v-rot">0</span></label>
+        <input type="range" id="s-rot" min="-3.14" max="3.14" value="0" step="0.02">
 
         <h4>💧 AGUA</h4>
         <label>Nivel <span class="value" id="v-agua">-3</span></label>
