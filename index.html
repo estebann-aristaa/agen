@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unseen - Panel</title>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #e5d1c5; font-family: 'Helvetica Neue', sans-serif; }
+        #webgl { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
+        
+        .ui-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2; display: flex; flex-direction: column; justify-content: space-between;
+            padding: 40px 60px; box-sizing: border-box; color: #2a2a2a;
+            pointer-events: none;
+        }
+        .navbar { display: flex; justify-content: space-between; align-items: center; pointer-events: auto; }
+        .logo { font-size: 1.5rem; font-weight: 600; }
+        .nav-links { display: flex; gap: 30px; font-size: 1rem; }
+        .nav-links a { color: #2a2a2a; text-decoration: none; }
+        .menu-btn { width: 50px; height: 50px; border-radius: 50%; background: white; border: none; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .hero-text { text-align: center; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); width: 100%; }
+        .subtitle { font-size: 0.75rem; letter-spacing: 2px; font-weight: 500; text-transform: uppercase; margin-bottom: 10px; }
+        h1 { font-family: 'Times New Roman', Times, serif; font-size: 4.5rem; margin: 0; line-height: 0.9; font-weight: 400; letter-spacing: -1px; }
+        h1 span { font-family: 'Helvetica Neue', sans-serif; font-weight: 700; letter-spacing: -3px; }
+        .cta-container { position: absolute; top: 65%; left: 50%; transform: translateX(-50%); pointer-events: auto; }
+        .cta-btn { background: rgba(255,255,255,0.9); border: none; padding: 15px 35px; border-radius: 30px; font-size: 1rem; font-weight: 500; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .footer { display: flex; justify-content: space-between; align-items: center; pointer-events: auto; font-size: 0.9rem; }
+        .footer-btn { background: rgba(255,255,255,0.8); border: none; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; cursor: pointer; }
+
+        /* ✨ PANEL GLASS ✨ */
+        #panel {
+            position: fixed; top: 20px; right: 20px; z-index: 999;
+            padding: 18px; border-radius: 20px;
+            width: 300px;
+            font-size: 12px; color: #2a2a2a;
+            max-height: 92vh; overflow-y: auto;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+            
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.3) transparent;
+        }
+        #panel.hidden {
+            transform: translateX(calc(100% + 40px));
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        /* Botón de ocultar */
+        #toggle-btn {
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            width: 50px; height: 50px; border-radius: 50%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white; font-size: 20px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        #toggle-btn:hover { transform: scale(1.1); }
+
+        #panel::-webkit-scrollbar { width: 6px; }
+        #panel::-webkit-scrollbar-track { background: transparent; }
+        #panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
+
+        #panel h4 { 
+            margin: 10px 0 8px 0; font-size: 12px; padding-bottom: 6px; 
+            color: #1a1a1a; font-weight: 700; letter-spacing: 0.5px;
+            text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+        #panel h4:first-child { margin-top: 0; }
+        #panel label { 
+            display: block; margin-top: 8px; font-weight: 600; 
+            font-size: 11px; color: #1a1a1a; text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+        }
+        #panel .value { 
+            float: right; color: #444; font-weight: 500; font-size: 10px;
+            background: rgba(255,255,255,0.4); padding: 1px 6px; border-radius: 6px;
+        }
+        #panel input[type="range"] { 
+            width: 100%; margin-top: 4px; appearance: none; -webkit-appearance: none;
+            height: 4px; background: rgba(255,255,255,0.4); border-radius: 2px; outline: none;
+        }
+        #panel input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 16px; height: 16px;
+            background: white; border-radius: 50%; cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: transform 0.15s;
+        }
+        #panel input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+        #panel button {
+            width: 100%; margin-top: 10px; padding: 9px; color: white;
+            border: 1px solid rgba(255,255,255,0.3); border-radius: 10px;
+            cursor: pointer; font-weight: 600; font-size: 11px;
+            background: rgba(0,0,0,0.55); backdrop-filter: blur(10px); transition: all 0.2s;
+        }
+        #panel button:hover { background: rgba(0,0,0,0.75); transform: translateY(-1px); }
+    </style>
+</head>
+<body>
+    <canvas id="webgl"></canvas>
+
+    <div class="ui-overlay">
+        <nav class="navbar">
+            <div class="logo">unseen studio®</div>
+            <div class="nav-links">
+                <a href="#">Index</a>
+                <a href="#">Projects</a>
+                <a href="#">Contact</a>
+            </div>
+            <button class="menu-btn">••</button>
+        </nav>
+        <div class="hero-text">
+            <p class="subtitle">A BRAND, DIGITAL & MOTION STUDIO</p>
+            <h1>Creating the<br><span>unexpected</span></h1>
+        </div>
+        <div class="cta-container">
+            <button class="cta-btn">View our work ↘</button>
+        </div>
+        <div class="footer">
+            <button class="footer-btn">Our 2025 Wrapped</button>
+            <span>©2026</span>
+        </div>
+    </div>
+
+    <!-- Botón para ocultar/mostrar panel -->
+    <button id="toggle-btn" onclick="togglePanel()">🎛️</button>
+
+    <div id="panel">
+        <h4>🏛️ EDIFICIO</h4>
+        <label>Tamaño <span class="value" id="v-ed-tam">40</span></label>
+        <input type="range" id="s-ed-tam" min="1" max="500" value="40" step="1">
+        <label>Altura Y <span class="value" id="v-ed-y">-1.5</span></label>
+        <input type="range" id="s-ed-y" min="-50" max="50" value="-1.5" step="0.5">
+        <label>Profundidad Z <span class="value" id="v-ed-z">-5</span></label>
+        <input type="range" id="s-ed-z" min="-100" max="50" value="-5" step="0.5">
+        <label>Posición X <span class="value" id="v-ed-x">0</span></label>
+        <input type="range" id="s-ed-x" min="-50" max="50" value="0" step="0.5">
+        <label>Girar Y <span class="value" id="v-ed-rot">0</span></label>
+        <input type="range" id="s-ed-rot" min="-3.14" max="3.14" value="0" step="0.02">
+
+        <h4>🏜️ DUNAS</h4>
+        <label>Tamaño <span class="value" id="v-du-tam">200</span></label>
+        <input type="range" id="s-du-tam" min="1" max="2000" value="200" step="1">
+        <label>Altura Y <span class="value" id="v-du-y">-3</span></label>
+        <input type="range" id="s-du-y" min="-100" max="100" value="-3" step="1">
+        <label>Profundidad Z <span class="value" id="v-du-z">-60</span></label>
+        <input type="range" id="s-du-z" min="-500" max="50" value="-60" step="1">
+        <label>Girar Y <span class="value" id="v-du-rot">0</span></label>
+        <input type="range" id="s-du-rot" min="-3.14" max="3.14" value="0" step="0.02">
+
+        <h4>💧 AGUA</h4>
+        <label>Nivel <span class="value" id="v-agua">-3</span></label>
+        <input type="range" id="s-agua" min="-30" max="10" value="-3" step="0.5">
+
+        <button onclick="printValues()">📋 Copiar Valores</button>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="script.js"></script>
+</body>
+</html>
