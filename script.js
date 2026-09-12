@@ -68,7 +68,7 @@ const orbitControls = new OrbitControls(camera, renderer.domElement);
 orbitControls.enableDamping = true;
 orbitControls.target.set(0, 3, 0);
 
-// 5. TransformControls (gizmo)
+// 5. TransformControls
 const transformControls = new TransformControls(camera, renderer.domElement);
 transformControls.setSize(1.5);
 scene.add(transformControls);
@@ -81,26 +81,33 @@ transformControls.addEventListener('change', () => {
     syncSlidersFromModel();
 });
 
-// 6. Cargar GLBs (edificio.glb y fondo.glb)
+// 6. GLBs
 let edificioModel = null;
-let dunasModel = null;
+let fondoModel = null;
 let edificioBaseSize = 1;
-let dunasBaseSize = 1;
+let fondoBaseSize = 1;
 let currentTarget = 'edificio';
+
+// 🔑 Referencia al objeto seleccionado
+function getTarget() {
+    return currentTarget === 'edificio' ? edificioModel : fondoModel;
+}
+function getTargetBaseSize() {
+    return currentTarget === 'edificio' ? edificioBaseSize : fondoBaseSize;
+}
 
 const loader = new GLTFLoader();
 loader.setMeshoptDecoder(MeshoptDecoder);
 
 loader.load('./fondo.glb', (gltf) => {
-    dunasModel = gltf.scene;
-    const box = new THREE.Box3().setFromObject(dunasModel);
-    dunasBaseSize = box.getSize(new THREE.Vector3()).length();
+    fondoModel = gltf.scene;
+    const box = new THREE.Box3().setFromObject(fondoModel);
+    fondoBaseSize = box.getSize(new THREE.Vector3()).length();
     const center = box.getCenter(new THREE.Vector3());
-    dunasModel.position.x -= center.x;
-    dunasModel.position.z -= center.z;
-    scene.add(dunasModel);
-    console.log('Fondo base size:', dunasBaseSize.toFixed(2));
-    updateAll();
+    fondoModel.position.x -= center.x;
+    fondoModel.position.z -= center.z;
+    scene.add(fondoModel);
+    console.log('Fondo base size:', fondoBaseSize.toFixed(2));
 });
 
 loader.load('./edificio.glb', (gltf) => {
@@ -138,91 +145,108 @@ water.position.y = -3;
 water.material.uniforms.size.value = 4.0;
 scene.add(water);
 
-// 8. Referencias
+// 8. Sliders
 const $ = id => document.getElementById(id);
 
-// 9. UpdateAll
+// 🔑 Los sliders SIEMPRE afectan al objeto seleccionado
 function updateAll() {
-    if (edificioModel) {
-        const tam = parseFloat($('s-ed-tam').value);
-        const y = parseFloat($('s-ed-y').value);
-        const z = parseFloat($('s-ed-z').value);
-        const x = parseFloat($('s-ed-x').value);
-        const rot = parseFloat($('s-ed-rot').value);
-        const escala = tam / edificioBaseSize;
-        edificioModel.scale.set(escala, escala, escala);
-        edificioModel.position.set(x, y, z);
-        edificioModel.rotation.y = rot;
-        $('v-ed-tam').textContent = tam;
-        $('v-ed-y').textContent = y.toFixed(1);
-        $('v-ed-z').textContent = z.toFixed(1);
-        $('v-ed-x').textContent = x.toFixed(1);
-        $('v-ed-rot').textContent = rot.toFixed(2);
-    }
-    if (dunasModel) {
-        const tam = parseFloat($('s-du-tam').value);
-        const y = parseFloat($('s-du-y').value);
-        const z = parseFloat($('s-du-z').value);
-        const rot = parseFloat($('s-du-rot').value);
-        const escala = tam / dunasBaseSize;
-        dunasModel.scale.set(escala, escala, escala);
-        dunasModel.position.set(0, y, z);
-        dunasModel.rotation.y = rot;
-        $('v-du-tam').textContent = tam;
-        $('v-du-y').textContent = y.toFixed(0);
-        $('v-du-z').textContent = z.toFixed(0);
-        $('v-du-rot').textContent = rot.toFixed(2);
-    }
+    const target = getTarget();
+    const baseSize = getTargetBaseSize();
+    
+    if (!target) return;
+    
+    const tam = parseFloat($('s-tam').value);
+    const x = parseFloat($('s-x').value);
+    const y = parseFloat($('s-y').value);
+    const z = parseFloat($('s-z').value);
+    const rot = parseFloat($('s-rot').value);
+    
+    // Aplicar al objeto seleccionado
+    const escala = tam / baseSize;
+    target.scale.set(escala, escala, escala);
+    target.position.set(x, y, z);
+    target.rotation.y = rot;
+    
+    // Actualizar etiquetas
+    $('v-tam').textContent = tam;
+    $('v-x').textContent = x.toFixed(1);
+    $('v-y').textContent = y.toFixed(1);
+    $('v-z').textContent = z.toFixed(1);
+    $('v-rot').textContent = rot.toFixed(2);
+    
+    // Actualizar el nombre del objeto
+    $('target-name').textContent = currentTarget === 'edificio' ? '🏛️ EDIFICIO' : '🏜️ FONDO';
+    
+    // Actualizar el agua aparte
     const agua = parseFloat($('s-agua').value);
     water.position.y = agua;
     $('v-agua').textContent = agua.toFixed(1);
 }
 
-// 10. Sync sliders cuando mueves con gizmo
+// 🔑 Cuando mueves con el gizmo, sincroniza los sliders
 function syncSlidersFromModel() {
-    if (!edificioModel) return;
+    const target = getTarget();
+    if (!target) return;
     
-    if (currentTarget === 'edificio') {
-        const pos = edificioModel.position;
-        const rot = edificioModel.rotation.y;
-        $('s-ed-x').value = pos.x.toFixed(1);
-        $('s-ed-y').value = pos.y.toFixed(1);
-        $('s-ed-z').value = pos.z.toFixed(1);
-        $('s-ed-rot').value = rot.toFixed(2);
-        $('v-ed-x').textContent = pos.x.toFixed(1);
-        $('v-ed-y').textContent = pos.y.toFixed(1);
-        $('v-ed-z').textContent = pos.z.toFixed(1);
-        $('v-ed-rot').textContent = rot.toFixed(2);
-    } else if (currentTarget === 'dunas' && dunasModel) {
-        const pos = dunasModel.position;
-        const rot = dunasModel.rotation.y;
-        $('s-du-y').value = pos.y.toFixed(0);
-        $('s-du-z').value = pos.z.toFixed(0);
-        $('s-du-rot').value = rot.toFixed(2);
-        $('v-du-y').textContent = pos.y.toFixed(0);
-        $('v-du-z').textContent = pos.z.toFixed(0);
-        $('v-du-rot').textContent = rot.toFixed(2);
-    }
+    const pos = target.position;
+    const rot = target.rotation.y;
+    const escala = target.scale.x;
+    const baseSize = getTargetBaseSize();
+    const tam = escala * baseSize;
+    
+    $('s-tam').value = tam.toFixed(1);
+    $('s-x').value = pos.x.toFixed(1);
+    $('s-y').value = pos.y.toFixed(1);
+    $('s-z').value = pos.z.toFixed(1);
+    $('s-rot').value = rot.toFixed(2);
+    
+    $('v-tam').textContent = tam.toFixed(1);
+    $('v-x').textContent = pos.x.toFixed(1);
+    $('v-y').textContent = pos.y.toFixed(1);
+    $('v-z').textContent = pos.z.toFixed(1);
+    $('v-rot').textContent = rot.toFixed(2);
 }
 
 // Conectar sliders
-['s-ed-tam','s-ed-y','s-ed-z','s-ed-x','s-ed-rot','s-du-tam','s-du-y','s-du-z','s-du-rot','s-agua'].forEach(id => {
+['s-tam','s-x','s-y','s-z','s-rot','s-agua'].forEach(id => {
     $(id).addEventListener('input', updateAll);
 });
 
-// 11. Cambiar objetivo
+// 🔑 Cambiar objetivo - AHORA carga los valores actuales del objeto
 window.selectTarget = function(target) {
     currentTarget = target;
-    if (target === 'edificio' && edificioModel) {
-        transformControls.attach(edificioModel);
-    } else if (target === 'dunas' && dunasModel) {
-        transformControls.attach(dunasModel);
+    const model = getTarget();
+    const baseSize = getTargetBaseSize();
+    
+    if (model) {
+        // Cargar valores actuales en los sliders
+        const escala = model.scale.x;
+        const tam = escala * baseSize;
+        
+        $('s-tam').value = tam.toFixed(1);
+        $('s-x').value = model.position.x.toFixed(1);
+        $('s-y').value = model.position.y.toFixed(1);
+        $('s-z').value = model.position.z.toFixed(1);
+        $('s-rot').value = model.rotation.y.toFixed(2);
+        
+        // Actualizar etiquetas
+        $('v-tam').textContent = tam.toFixed(1);
+        $('v-x').textContent = model.position.x.toFixed(1);
+        $('v-y').textContent = model.position.y.toFixed(1);
+        $('v-z').textContent = model.position.z.toFixed(1);
+        $('v-rot').textContent = model.rotation.y.toFixed(2);
+        $('target-name').textContent = target === 'edificio' ? '🏛️ EDIFICIO' : '🏜️ FONDO';
+        
+        // Anclar el gizmo al nuevo objetivo
+        transformControls.attach(model);
     }
+    
+    // Actualizar botones
     $('btn-sel-ed').classList.toggle('active', target === 'edificio');
-    $('btn-sel-du').classList.toggle('active', target === 'dunas');
+    $('btn-sel-fo').classList.toggle('active', target === 'fondo');
 };
 
-// 12. Cambiar modo
+// 12. Cambiar modo del gizmo
 window.setMode = function(mode) {
     transformControls.setMode(mode);
     $('btn-mode-translate').classList.toggle('active', mode === 'translate');
@@ -233,7 +257,7 @@ window.setMode = function(mode) {
 // 13. Atajos teclado
 window.addEventListener('keydown', (e) => {
     if (e.key === '1') selectTarget('edificio');
-    if (e.key === '2') selectTarget('dunas');
+    if (e.key === '2') selectTarget('fondo');
     if (e.key === 'w' || e.key === 'W') setMode('translate');
     if (e.key === 'e' || e.key === 'E') setMode('rotate');
     if (e.key === 'r' || e.key === 'R') setMode('scale');
@@ -243,9 +267,17 @@ window.addEventListener('keydown', (e) => {
 // 14. Copiar valores
 window.printValues = function() {
     console.log('=== EDIFICIO ===');
-    console.log(`tam: ${$('s-ed-tam').value}, x: ${$('s-ed-x').value}, y: ${$('s-ed-y').value}, z: ${$('s-ed-z').value}, rot: ${$('s-ed-rot').value}`);
+    if (edificioModel) {
+        const baseSize = edificioBaseSize;
+        const tam = edificioModel.scale.x * baseSize;
+        console.log(`tam: ${tam.toFixed(1)}, x: ${edificioModel.position.x.toFixed(1)}, y: ${edificioModel.position.y.toFixed(1)}, z: ${edificioModel.position.z.toFixed(1)}, rot: ${edificioModel.rotation.y.toFixed(2)}`);
+    }
     console.log('=== FONDO ===');
-    console.log(`tam: ${$('s-du-tam').value}, y: ${$('s-du-y').value}, z: ${$('s-du-z').value}, rot: ${$('s-du-rot').value}`);
+    if (fondoModel) {
+        const baseSize = fondoBaseSize;
+        const tam = fondoModel.scale.x * baseSize;
+        console.log(`tam: ${tam.toFixed(1)}, x: ${fondoModel.position.x.toFixed(1)}, y: ${fondoModel.position.y.toFixed(1)}, z: ${fondoModel.position.z.toFixed(1)}, rot: ${fondoModel.rotation.y.toFixed(2)}`);
+    }
     console.log('=== AGUA ===');
     console.log(`nivel: ${$('s-agua').value}`);
     alert('¡Valores en la consola! Abre F12.');
