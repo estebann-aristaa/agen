@@ -1000,10 +1000,6 @@ html.-ready .c-places-after .rv.-inview{opacity:1;transform:none}
   to{opacity:1;transform:translateY(0);}
 }
 
-
-/* ============================================================
-   POLICY OVERLAY
-   ============================================================ */
 .policy-overlay{
   --ph:clamp(calc(7.5*var(--pr)),9vw,calc(11*var(--pr)));
   position:fixed;
@@ -1376,6 +1372,87 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.policy-overlay::-webkit-scrollb
 .menu-overlay.open .menu-links a:nth-child(1){transition-delay:.15s}
 .menu-overlay.open .menu-links a:nth-child(2){transition-delay:.25s}
 .menu-overlay.open .menu-links a:nth-child(3){transition-delay:.35s}
+
+html,body{max-width:100%}
+ 
+/* FIX: el --g-margin de escritorio pisaba al de móvil en estas secciones */
+@media (max-width:1023px){
+  :root{--g-margin:2rem;--mb-w:72vw;--mb-top:66%;--cardp-w:19vw;--cardi-w:19vw}
+  .c-places-after,.c-formed,.c-admission,.policy-overlay{--g-margin:calc(1.4*var(--pr))}
+  .places-scroll{--g-margin:calc(1.4*var(--pr));--large:min(max(calc(var(--h0)*var(--type-step)*var(--type-step)),12.5vw),15vw)}
+  html[lang] .h-title.line-1{--t1-size:14vw}
+  html[lang] .h-title.line-2{--t2-size:14vw}
+  html[lang] .h-title.line-3{--t3-size:14vw}
+  .imagine{display:none}
+  .nav-pill{padding:0 1rem}
+  .menu-overlay{padding:0 var(--g-margin)}
+}
+ 
+/* Header: en pantallas medianas se esconde el nav central (ya está en el menú) */
+@media (max-width:900px){
+  .main-nav{display:none}
+  .header-left{flex:0 0 auto}
+  .header-right{flex:1}
+}
+ 
+/* ================= MÓVIL ================= */
+@media (max-width:700px){
+  :root{--g-margin:1.25rem;--g-gap:.75rem;--mb-w:98vw;--mb-top:77%}
+ 
+  /* selector de idioma inicial */
+  .lang-overlay .logo-mark{margin-bottom:2.5rem}
+  .lang-overlay .lang-buttons{gap:.8rem}
+  .lang-overlay .lang-buttons button{min-width:0;padding:1.1em 1.6em;font-size:.85rem}
+ 
+  /* header */
+  .site-header{padding-top:1rem}
+  .logo{font-size:1.15rem}
+  .header-right{gap:.5rem}
+  .lang-switch button{padding:.5em .75em;font-size:.65rem}
+  .menu-btn{width:auto;min-width:5.6rem;gap:.7rem;padding:0 .8rem}
+ 
+  /* hero */
+  .c-welcome .-w{padding-top:15vh;padding-bottom:calc(var(--vh)*6)}
+  html[lang] .h-title.line-1{--t1-size:19vw;--left:1;--width:12}
+  html[lang] .h-title.line-2{--t2-size:19vw;--left:1;--width:12}
+  html[lang] .h-title.line-3{--t3-size:19vw;--left:1;--width:12}
+  .side{display:none}
+  .c-welcome .cta{--left:1;--width:7}
+  .places,.items{display:none}
+ 
+  /* Projects */
+  .places-scroll{--large:17vw}
+  .c-places .caption{font-size:var(--h5)}
+ 
+  /* Map */
+  .c-places-after .-w .title.-h1{font-size:min(var(--h1),11.5vw)}
+  .c-places-after .-w .caption{font-size:var(--p)}
+  .c-places-after .macbook{width:50%;right:-4%}
+  .c-places-after .cta{flex-wrap:wrap;gap:1rem}
+ 
+  /* People */
+  .c-formed .giant{font-size:24vw}
+  .c-formed .title{font-size:min(var(--h1),13vw)}
+ 
+  /* Admission */
+  .c-admission{padding-top:calc(5*var(--pr))}
+  .c-admission .title{margin-bottom:calc(3*var(--pr))}
+  .c-admission form{row-gap:calc(2.2*var(--pr))}
+  .c-admission .button-wrap .button,.c-admission .button{width:100%;min-width:0}
+  .form-status{text-align:left}
+ 
+  /* Footer */
+  .c-footer .ft-cta{flex-wrap:wrap;gap:1rem}
+  .c-footer .ft-contact a{overflow-wrap:anywhere}
+  .c-footer .ft-words a{font-size:min(calc(3.6*var(--pr)),15vw)}
+ 
+  /* Menú */
+  .menu-links a{font-size:clamp(3rem,16vw,6rem)}
+ 
+  /* Policy */
+  .policy-title{font-size:clamp(2.4rem,13vw,4rem)}
+  .policy-close{min-width:0}
+}
 </style>
 </head>
 <body>
