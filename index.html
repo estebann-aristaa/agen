@@ -1373,7 +1373,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.policy-overlay::-webkit-scrollb
 .menu-overlay.open .menu-links a:nth-child(2){transition-delay:.25s}
 .menu-overlay.open .menu-links a:nth-child(3){transition-delay:.35s}
 
-/* ===== RESPONSIVE PATCH (pegar antes de </style>) ===== */
+/* ===== RESPONSIVE PATCH ===== */
 html,body{max-width:100%}
  
 /* FIX: el --g-margin de escritorio pisaba al de móvil en estas secciones */
@@ -1381,9 +1381,9 @@ html,body{max-width:100%}
   :root{--g-margin:2rem;--mb-w:72vw;--mb-top:66%;--cardp-w:19vw;--cardi-w:19vw}
   .c-places-after,.c-formed,.c-admission,.policy-overlay{--g-margin:calc(1.4*var(--pr))}
   .places-scroll{--g-margin:calc(1.4*var(--pr));--large:min(max(calc(var(--h0)*var(--type-step)*var(--type-step)),12.5vw),15vw)}
-  html[lang] .h-title.line-1{--t1-size:14vw}
-  html[lang] .h-title.line-2{--t2-size:14vw}
-  html[lang] .h-title.line-3{--t3-size:14vw}
+  html[lang] .h-title.line-1{--t1-size:11vw}
+  html[lang] .h-title.line-2{--t2-size:11vw}
+  html[lang] .h-title.line-3{--t3-size:11vw}
   .imagine{display:none}
   .nav-pill{padding:0 1rem}
   .menu-overlay{padding:0 var(--g-margin)}
@@ -1411,17 +1411,23 @@ html,body{max-width:100%}
   .lang-switch button{padding:.5em .75em;font-size:.65rem}
   .menu-btn{width:auto;min-width:5.6rem;gap:.7rem;padding:0 .8rem}
 
-  /* HERO: layout en flujo (título, botón, laptop) para que nada se tape */
-  .c-welcome{display:flex;flex-direction:column;min-height:calc(var(--vh)*100);padding-bottom:calc(var(--vh)*8)}
-  .c-welcome::before{top:auto;height:calc(var(--vh)*32)}
-  .c-welcome .-w{min-height:0;grid-template-rows:none;row-gap:.3rem;align-items:start;padding-top:calc(var(--vh)*15);padding-bottom:0}
-  html[lang] .h-title.line-1{--t1-size:19vw;--left:1;--width:12}
-  html[lang] .h-title.line-2{--t2-size:19vw;--left:1;--width:12}
-  html[lang] .h-title.line-3{--t3-size:19vw;--left:1;--width:12}
-  .side,.places,.items{display:none}
-  .c-welcome .cta{--left:1;--width:8;margin-top:1.8rem}
-  .c-welcome .macbook{position:relative;left:auto;top:auto;width:calc(100% - 2.5rem);align-self:center;margin-top:2.5rem;translate:none!important;scale:1!important}
-
+  /* HERO móvil: mismo diseño de escritorio, escalado para celular */
+  :root{--mb-w:115vw;--mb-top:60%;--cardp-w:34vw;--cardi-w:34vw;--cardp-rot:-10deg;--cardi-rot:10deg;--t2-x:-10vw}
+  .c-welcome::before{top:8vh;top:calc(var(--vh)*8)}
+  .c-welcome .-w{min-height:calc(var(--vh)*100);grid-template-rows:none;align-content:start;row-gap:0;align-items:start;padding-top:calc(var(--vh)*25);padding-bottom:0}
+  html[lang] .h-title.line-1{--t1-size:17vw;--left:3;--width:10}
+  html[lang] .h-title.line-2{--t2-size:17vw;--left:1;--width:12}
+  html[lang] .h-title.line-3{--t3-size:17vw;--left:4;--width:9}
+  .c-welcome .-w>.side,.c-welcome .-w>.places,.c-welcome .-w>.items{grid-column:auto;grid-row:auto}
+  .side{position:absolute;width:max-content;z-index:4}
+  .side.line-1-m,html.-loaded.-ready .side.line-1-m{left:64%;top:calc(var(--vh)*20.5);margin:0;transform:translateX(-50%)!important}
+  .side.line-2-m,html.-loaded.-ready .side.line-2-m{left:17%;top:calc(var(--vh)*36.5);margin:0;transform:translateX(-50%)!important}
+  .c-welcome .cta{--left:1;--width:12;width:58%;margin:calc(var(--vh)*4) 0 0 18%}
+  .c-welcome .cta-label{padding-left:2.6em}
+  [data-edit="cta"]{z-index:12!important}
+  .places,.items{position:absolute;top:auto;bottom:calc(var(--vh)*12);transform-origin:50% 50%}
+  .places{left:calc(-1*var(--g-margin) - 4vw)}
+  .items{right:calc(-1*var(--g-margin) + 1vw);left:auto}
   .places-scroll{--large:17vw}
   .c-places .caption{font-size:var(--h5)}
 
